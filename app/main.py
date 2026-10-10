@@ -94,7 +94,10 @@ async def setup_profile(resume: UploadFile = File(...)):
     from app.core.markdown_exporter import export_profile_to_markdown
 
     resume_bytes = await resume.read()
-    resume_text = extract_text_from_pdf(resume_bytes)
+    try:
+        resume_text = extract_text_from_pdf(resume_bytes)
+    except PyPDF2.errors.PdfReadError:
+        raise HTTPException(status_code=422, detail="Unable to read PDF file")
     profile = extract_profile(resume_text)
 
     # Extract structured projects from the raw "projects" section text
